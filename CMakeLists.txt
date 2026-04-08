@@ -9,5 +9,6 @@ if(NOT MSVC)
 endif()
 
 include_directories(include)
-
+add_executable(generator src/gen.cpp)
 add_executable(decremental_tree_connectivity src/main.cpp)
+

@@ -17,8 +17,8 @@ public:
         auto remove_from_adj = [&](int a, int b) {
             auto it = std::find(neighbors[a].begin(), neighbors[a].end(), b);
             if (it != neighbors[a].end()) {
-                std::iter_swap(it, neighbors[b].end() - 1);
-                neighbors.pop_back();
+                std::iter_swap(it, neighbors[a].end() - 1);
+                neighbors[a].pop_back();
             }
         };
 
@@ -26,7 +26,7 @@ public:
         remove_from_adj(v, u);
     }
 
-    bool connected(int u, int v) const override {
+    bool connected(int u, int v) override {
         if (u == v)
             return true;
         std::queue<int> q;
@@ -35,6 +35,7 @@ public:
         vis[u] = true;
         while (!q.empty()) {
             int cur = q.front();
+            q.pop();
             for (auto nei : neighbors[cur]) {
                 if (nei == v)
                     return true;

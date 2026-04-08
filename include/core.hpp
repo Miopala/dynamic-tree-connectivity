@@ -10,5 +10,5 @@ class DecrementalConnectivitySolver {
 public:
     virtual ~DecrementalConnectivitySolver() = default;
     virtual void cut(int u, int v) = 0;
-    virtual bool connected(int u, int v) const = 0;
+    virtual bool connected(int u, int v) = 0;
 };

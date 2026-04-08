@@ -1,5 +1,7 @@
 #include "../include/brute-force.hpp"
 #include "../include/core.hpp"
+#include "../include/euler-tour.hpp"
+#include "../include/small-to-large.hpp"
 #include <iostream>
 #include <memory>
 #include <string_view>
@@ -16,8 +18,12 @@ int main(int argc, char* argv[]) {
     int n, m;
     std::cin >> n >> m;
     std::vector<Edge> edges(n - 1);
-    for (int i = 0; i < n - 1; i++)
+    for (int i = 0; i < n - 1; i++) {
         std::cin >> edges[i].u >> edges[i].v;
+        if (edges[i].u > edges[i].v) {
+            std::swap(edges[i].u, edges[i].v);
+        }
+    }
 
     std::string_view chosen_algorithm(argv[1]);
     std::unique_ptr<DecrementalConnectivitySolver> solver;
@@ -25,9 +31,9 @@ int main(int argc, char* argv[]) {
     if (chosen_algorithm == "brute-force") {
         solver = std::make_unique<NaiveSolver>(n, edges);
     } else if (chosen_algorithm == "euler-tour") {
-        // solver = std::make_unique<EulerTourSolver>(n, edges);
+        solver = std::make_unique<EulerTourSolver>(n, edges);
     } else if (chosen_algorithm == "small-to-large") {
-        // solver = std::make_unique<SmallToLargeSolver>(n, edges);
+        solver = std::make_unique<SmallToLargeSolver>(n, edges);
     } else if (chosen_algorithm == "micro-tree") {
         // solver = std::make_unique<MicroTreeSolver>(n, edges);
     } else {
