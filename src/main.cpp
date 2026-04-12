@@ -1,6 +1,7 @@
 #include "../include/brute-force.hpp"
 #include "../include/core.hpp"
 #include "../include/euler-tour.hpp"
+#include "../include/micro-tree.hpp"
 #include "../include/small-to-large.hpp"
 #include <iostream>
 #include <memory>
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
     } else if (chosen_algorithm == "small-to-large") {
         solver = std::make_unique<SmallToLargeSolver>(n, edges);
     } else if (chosen_algorithm == "micro-tree") {
-        // solver = std::make_unique<MicroTreeSolver>(n, edges);
+        solver = std::make_unique<MicroTreeSolver>(n, edges);
     } else {
         return EXIT_FAILURE;
     }

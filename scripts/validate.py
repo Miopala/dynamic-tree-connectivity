@@ -2,7 +2,7 @@ import subprocess
 import time
 import os
 
-ALGORITHMS = ["small-to-large","euler-tour"]
+ALGORITHMS = ["small-to-large","euler-tour", "micro-tree"]
 BASE_ALGO = "brute-force"
 N, M = 100000, 200000
 ITERATIONS = 5

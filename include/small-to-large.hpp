@@ -9,7 +9,13 @@
 
 class SmallToLargeSolver : public DecrementalConnectivitySolver {
 public:
-    SmallToLargeSolver(int _n, const std::vector<Edge>& edges) : n(_n) {
+    SmallToLargeSolver() = default;
+    SmallToLargeSolver(int _n, const std::vector<Edge>& edges) {
+        setup(_n, edges);
+    }
+
+    void setup(int _n, const std::vector<Edge>& edges) {
+        n = _n;
         neighbors.resize(n);
         component_id.resize(n, 1);
         edge_erased.resize(edges.size(), false);
@@ -113,7 +119,7 @@ public:
     }
 
 private:
-    const int n;
+    int n;
     int counter = 1;
     std::vector<int> component_id;
     std::vector<bool> edge_erased;
