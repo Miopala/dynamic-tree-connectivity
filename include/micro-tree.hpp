@@ -3,9 +3,9 @@
 #include "small-to-large.hpp"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits.h>
 #include <queue>
-
 const int FULL_MSK = INT_MAX;
 
 class MicroTreeSolver : public DecrementalConnectivitySolver {
@@ -84,7 +84,6 @@ public:
             chunk_vertices.resize(n);
             which_chunk.resize(n, -1);
             chunk_mask.resize(n, 0);
-
             dfs_macrotree(0, -1);
 
             for (auto u : chunk_roots) {
@@ -117,6 +116,10 @@ public:
                     continue;
 
                 for (auto v : macro_neighbors[i]) {
+                    if (i > v)
+                        continue;
+                    if (which_chunk[i] != -1 && which_chunk[i] == which_chunk[v])
+                        continue;
                     int id_1 = macrotree_id[i];
                     if (chunk_id[i] != -1 && chunk_vertices[which_chunk[i]].back() == i) {
                         id_1++;
@@ -126,9 +129,7 @@ public:
                         id_2++;
                     }
 
-                    if (id_1 < id_2) {
-                        macro_edges.emplace_back(id_1, id_2);
-                    }
+                    macro_edges.emplace_back(id_1, id_2);
                 }
             }
 
@@ -140,8 +141,6 @@ public:
 
     void dfs_macrotree(int u, int fa) {
         int real_neighbors_count = macro_neighbors[u].size();
-        if (fa != -1)
-            real_neighbors_count--;
 
         if (real_neighbors_count != 2 || u == 0) {
             macrotree_id[u] = macrotree_id_counter++;
@@ -217,41 +216,38 @@ public:
     void cut(int u, int v) override {
         if (depth[u] > depth[v])
             std::swap(u, v);
-
-        // we have ensured that u is parent of v
         if (cut_orig[v])
             return;
         cut_orig[v] = true;
 
-        int microtree_nr = which_microtree[u];
-
-        if (microtree_nr != -1) {
-            assert(microtree_id[v] != -1);
-            microtree_mask[microtree_nr] ^= (1 << microtree_id[v]);
+        if (which_microtree[v] != -1) {
+            if (which_microtree[u] == which_microtree[v]) {
+                int nr = which_microtree[v];
+                microtree_mask[nr] ^= (1 << microtree_id[v]);
+            }
+            return;
         }
 
-        int chunk_nr = which_chunk[u];
-        if (chunk_nr != -1) {
-            assert(chunk_id[v] != -1);
-            chunk_mask[chunk_nr] ^= (1 << chunk_id[v]);
-        }
+        if (which_chunk[v] != -1 && which_chunk[u] == which_chunk[v]) {
+            int nr = which_chunk[v];
+            chunk_mask[nr] ^= (1 << chunk_id[v]);
 
-        if (which_chunk[u] == which_chunk[v] && which_chunk[u] != -1) {
             int get_macro = macrotree_id[u];
-            assert(get_macro != -1);
             macroTreeSolver.cut(get_macro, get_macro + 1);
-        } else {
-            int id_1 = macrotree_id[u];
-            if (chunk_id[u] != -1 && chunk_vertices[which_chunk[u]].back() == u) {
-                id_1++;
-            }
-
-            int id_2 = macrotree_id[v];
-            if (chunk_id[v] != -1 && chunk_vertices[which_chunk[v]].back() == v) {
-                id_2++;
-            }
-            macroTreeSolver.cut(id_1, id_2);
+            return;
         }
+
+        int id_1 = macrotree_id[u];
+        if (chunk_id[u] != -1 && chunk_vertices[which_chunk[u]].back() == u) {
+            id_1++;
+        }
+
+        int id_2 = macrotree_id[v];
+        if (chunk_id[v] != -1 && chunk_vertices[which_chunk[v]].back() == v) {
+            id_2++;
+        }
+
+        macroTreeSolver.cut(id_1, id_2);
     }
 
     bool connected(int u, int v) override {

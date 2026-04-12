@@ -20,7 +20,7 @@ compile_commands.json
 *.swp
 *.swo
 *~
-
+*.in
 
 gmon.out
 perf.data

@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
         solver = std::make_unique<EulerTourSolver>(n, edges);
     } else if (chosen_algorithm == "small-to-large") {
         solver = std::make_unique<SmallToLargeSolver>(n, edges);
-    } else if (chosen_algorithm == "micro-tree") {
+    } else if (chosen_algorithm == "micro-trees") {
         solver = std::make_unique<MicroTreeSolver>(n, edges);
     } else {
         return EXIT_FAILURE;
