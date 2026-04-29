@@ -48,31 +48,7 @@ public:
             }
         }
 
-        /*
-            BEDA POTRZEBNE:
-            macrotree_id -> nr w macro
-            adj[u].size()
-            std::vector<std::vector<int>> on_chunk;
-            // chunk_id_macro[u] => default -1 jesli adj
-            //
-            // chunk_size[]
-
-            pref_chunk
-            suf_chunk ale to potem
-
-
-
-            // pamietaj jesli sub[u] < LOG => wtedy nie robimy macro
-              std::vector<int> macrotree_id;
-        std::vector<int> chunk_id;
-        std::vector<int> chunk_pref;
-        std::vector<int> chuk_suf;
-        std::vector<int> chunk_size;
-        std::vector<std::vector<int>> chunk_vertices;
-
-        std::vector<int> chunk_roots;
-
-        */
+        // CHAINS PREPROCESSING
 
         if (sub[0] >= LOG) {
 
@@ -139,7 +115,7 @@ public:
         }
     }
 
-    void dfs_macrotree(int u, int fa) {
+    void dfs_macrotree(int u, int fa) { // precomputing for macrotrees
         int real_neighbors_count = macro_neighbors[u].size();
 
         if (real_neighbors_count != 2 || u == 0) {
@@ -150,14 +126,14 @@ public:
                 which_chunk[u] = which_chunk[fa];
                 chunk_size[which_chunk[u]]++;
                 macrotree_id[u] = macrotree_id[fa];
-            } else { // nowy lancuch
+            } else { // new chain
                 which_chunk[u] = chunk_id_counter++;
                 chunk_size[which_chunk[u]] = 1;
                 chunk_id[u] = 0;
                 chunk_roots.push_back(u);
                 macrotree_id[u] = macrotree_id_counter;
                 macrotree_id_counter += 2;
-                // dla kazdego lancucha tworzymy tak ze gorna czesc laczymy i dolna osobna
+                // for every chain we duplicate its node and connect with edge
             }
 
             chunk_vertices[which_chunk[u]].push_back(u);
@@ -170,7 +146,8 @@ public:
         }
     }
 
-    void dfs_microtree(int u, int fa, int micro_root, int microtree_nr) {
+    void dfs_microtree(int u, int fa, int micro_root,
+                       int microtree_nr) { // precomputing for microtress
         microtree_id[u] = microtree_id_counter++;
         which_microtree[u] = microtree_nr;
         if (micro_root != u) {

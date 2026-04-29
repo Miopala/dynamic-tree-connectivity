@@ -63,11 +63,7 @@ public:
                 A[i][lvl] = A[A[i][lvl - 1]][lvl - 1];
             }
         }
-
         f.resize(euler_tour.size());
-
-        for (int i = 1; i < n; i++)
-            update(i, 1);
     }
 
     void update(int u, int val) {
@@ -80,10 +76,6 @@ public:
     int query(int u, int v) {
         int LCA = lca(u, v);
         return f.query(pre[LCA], pre[u]) + f.query(pre[LCA], pre[v]) - cur_val[LCA] * 2;
-    }
-
-    int length(int u, int v) {
-        return depth[u] + depth[v] - depth[lca(u, v)] * 2;
     }
 
     int lca(int u, int v) {
@@ -121,12 +113,12 @@ public:
 
     void cut(int u, int v) override {
         if (u == par[v])
-            std::swap(u, v); // assert v = par[u]
-        update(u, 0);
+            std::swap(u, v); 
+        update(u, 1);
     }
 
     bool connected(int u, int v) override {
-        if (u == v || length(u, v) == query(u, v))
+        if (u == v || query(u, v) == 0)
             return true;
         return false;
     }
