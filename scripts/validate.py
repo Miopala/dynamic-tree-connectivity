@@ -6,7 +6,7 @@ import random
 import resource
 
 TREE_TYPES = ["random", "deep", "caterpillar", "caterpillar_with_trees", "misc_1", "misc_2"]
-ALGORITHMS = ["euler-tour", "micro-trees"]
+ALGORITHMS = ["euler-tour", "micro-trees","euler-tour-trees"]
 BASE_ALGO = "small-to-large"
 BRUTE_ALGO = "brute-force"
 
@@ -68,7 +68,7 @@ def print_header(mode, n, m, iteration, total_iters):
 def benchmark(mode, iterations):
     set_unlimited_stack()
     if mode == "correctness_test":
-        n, m, ref_algo = 1000, 5000, BRUTE_ALGO
+        n, m, ref_algo = 100, 50000, BRUTE_ALGO
         test_algos = ALGORITHMS + [BASE_ALGO]
     else:
         n, m, ref_algo = 1000000, 2000000, BASE_ALGO

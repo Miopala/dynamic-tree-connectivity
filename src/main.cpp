@@ -1,5 +1,6 @@
 #include "../include/brute-force.hpp"
 #include "../include/core.hpp"
+#include "../include/euler-tour-trees.hpp"
 #include "../include/euler-tour.hpp"
 #include "../include/micro-tree.hpp"
 #include "../include/small-to-large.hpp"
@@ -12,7 +13,8 @@ int main(int argc, char* argv[]) {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(nullptr);
     if (argc != 2) {
-        std::cerr << "usage: " << argv[0] << " [brute-force|euler-tour|small-to-large|micro-trees]";
+        std::cerr << "usage: " << argv[0]
+                  << " [brute-force|euler-tour|small-to-large|micro-trees|euler-tour-trees]";
         return EXIT_FAILURE;
     }
 
@@ -37,7 +39,11 @@ int main(int argc, char* argv[]) {
         solver = std::make_unique<SmallToLargeSolver>(n, edges);
     } else if (chosen_algorithm == "micro-trees") {
         solver = std::make_unique<MicroTreeSolver>(n, edges);
-    } else {
+    } else if (chosen_algorithm == "euler-tour-trees") {
+        solver = std::make_unique<EulerTourTreesSolver>(n, edges);
+    }
+
+    else {
         return EXIT_FAILURE;
     }
 
