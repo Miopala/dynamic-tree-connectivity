@@ -140,10 +140,10 @@ public:
 
         st.splay(vu);
 
-        Node* mid = vu->sons[0];
+        Node* mid = vu->sons[0]; // (u,v) (subtree of v)
         if (mid) {
             mid->parent = nullptr;
-            st.splay(uv);
+            st.splay(uv); // smallest element so it has only right son so we just cut
             if (uv->sons[1])
                 uv->sons[1]->parent = nullptr;
             uv->sons[1] = nullptr;
