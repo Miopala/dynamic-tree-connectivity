@@ -135,6 +135,9 @@ public:
         Node* vu = edges_nodes[key_vu];
 
         st.make_first(uv);
+
+        // we have (u,v) (subtree of v) (v,u) (subtree containing u)
+
         st.splay(vu);
 
         Node* mid = vu->sons[0];
@@ -146,7 +149,7 @@ public:
             uv->sons[1] = nullptr;
         }
 
-        Node* right = vu->sons[1];
+        Node* right = vu->sons[1]; // component containing (u,u)
         if (right)
             right->parent = nullptr;
 
