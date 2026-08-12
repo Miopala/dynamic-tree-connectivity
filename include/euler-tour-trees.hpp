@@ -1,4 +1,4 @@
-#include "../include/core.hpp"
+#include "core.hpp"
 #include <algorithm>
 #include <cassert>
 #include <unordered_map>

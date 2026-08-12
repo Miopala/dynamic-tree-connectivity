@@ -1,9 +1,9 @@
-#include "../include/brute-force.hpp"
-#include "../include/core.hpp"
-#include "../include/euler-tour-trees.hpp"
-#include "../include/euler-tour.hpp"
-#include "../include/micro-tree.hpp"
-#include "../include/small-to-large.hpp"
+#include "brute-force.hpp"
+#include "core.hpp"
+#include "euler-tour-trees.hpp"
+#include "euler-tour.hpp"
+#include "micro-tree.hpp"
+#include "small-to-large.hpp"
 #include <iostream>
 #include <memory>
 #include <string_view>
@@ -53,8 +53,9 @@ int main(int argc, char* argv[]) {
         std::cin >> type >> u >> v;
         if (type == 'C')
             solver->cut(u, v);
-        else
+        else {
             std::cout << (solver->connected(u, v) ? "YES\n" : "NO\n");
+        }
     }
     return EXIT_SUCCESS;
 }

@@ -2,6 +2,7 @@
 #include "core.hpp"
 #include "small-to-large.hpp"
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <iostream>
 #include <limits.h>
@@ -10,7 +11,8 @@ const int FULL_MSK = INT_MAX;
 
 class MicroTreeSolver : public DecrementalConnectivitySolver {
 public:
-    MicroTreeSolver(int _n, const std::vector<Edge>& edges) : n(_n), LOG(log2(_n)) {
+    MicroTreeSolver(int _n, const std::vector<Edge>& edges)
+        : n(_n), LOG(std::max(1, std::bit_width(static_cast<unsigned>(_n)) - 1)) {
         neighbors.resize(n);
         for (const auto& [u, v] : edges) {
             neighbors[u].emplace_back(v);
@@ -24,6 +26,7 @@ public:
         pre.resize(n, 0);
         father.resize(n, 0);
         cut_orig.resize(n, false);
+
         dfs_init(0, -1);
 
         // MICRO_TREES_PREPROCESSiNG
@@ -384,8 +387,10 @@ private:
 
     std::vector<int> microtree_id;
     std::vector<int> which_microtree;
-    std::vector<int> microtree_mask;
-    std::vector<int> microtree_prefix_mask;
+    std::vector<int> microtree_mask;        // to jest dla calego microdrzewa
+    std::vector<int> microtree_prefix_mask; // to jest dla wierzcholka
+
+    // microtree_mask[id_microtree] & (microtree_prefix_mask[u] ^ microtree_prefix_mask[v])
     std::vector<bool> cut_orig;
 
     std::vector<int> macrotree_id;
