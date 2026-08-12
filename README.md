@@ -30,7 +30,39 @@ The bound marked with `*` in microtree-macrotree decomposition approach assumes 
 
 Euler-tour trees support also solving the version with inserting edges.
 
+## Quick start
 
+Configure and build the project from the repository root:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+Generate a test case:
+
+```bash
+./build/generator 1000 5000 12345 random > test.in
+```
+
+Run the microtree implementation:
+
+```bash
+./build/decremental_tree_connectivity micro-trees < test.in
+```
+
+Run three iterations of the correctness tests:
+
+```bash
+cd scripts
+python3 validate.py correctness_test 3
+```
+
+Run one large stress-test iteration:
+
+```bash
+python3 validate.py stress_test 1
+```
 
 ## Input format
 ```
@@ -115,7 +147,7 @@ Example:
 Generator arguments:
 
 ```text
-generator <nodes> <operations> <seed> <tree_type> [cut_ratio] [same_component_heavy]
+generator <nodes> <operations> <seed> <tree_type> [cut_ratio] [same_component_heavy] [same_comp_ratio]
 ```
 
 ## References

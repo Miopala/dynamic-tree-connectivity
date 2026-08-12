@@ -94,6 +94,8 @@ void gen_deep_random(int node_count, std::vector<Edge>& edges, std::mt19937& rng
 }
 
 void gen_caterpillar(int node_count, std::vector<Edge>& edges, std::mt19937& rng) {
+    if (node_count <= 1)
+        return;
     int spine_size =
         std::min(node_count, std::max(2, static_cast<int>(node_count / std::log2(node_count))));
     for (int i = 1; i < spine_size; ++i) {
@@ -106,6 +108,8 @@ void gen_caterpillar(int node_count, std::vector<Edge>& edges, std::mt19937& rng
 }
 
 void gen_caterpillar_with_trees(int node_count, std::vector<Edge>& edges, std::mt19937& rng) {
+    if (node_count <= 1)
+        return;
     int spine_size =
         std::min(node_count, std::max(2, static_cast<int>(node_count / std::log2(node_count))));
     for (int i = 1; i < spine_size; ++i) {
@@ -118,6 +122,8 @@ void gen_caterpillar_with_trees(int node_count, std::vector<Edge>& edges, std::m
 }
 
 void gen_misc_1(int node_count, std::vector<Edge>& edges, std::mt19937& rng) {
+    if (node_count <= 1)
+        return;
     int path_size = node_count / 2;
     for (int i = 1; i < path_size; ++i) {
         std::uniform_int_distribution<int> stick_dist(1, std::min(i, 5));
@@ -131,10 +137,15 @@ void gen_misc_1(int node_count, std::vector<Edge>& edges, std::mt19937& rng) {
 }
 
 void gen_misc_2(int node_count, std::vector<Edge>& edges, std::mt19937& rng) {
-    int k = std::min(node_count, std::max(2, static_cast<int>(std::sqrt(node_count))));
+    if (node_count <= 1)
+        return;
+
+    int k = std::min(node_count - 1, std::max(2, static_cast<int>(std::sqrt(node_count))));
+
     for (int i = 1; i <= k; ++i) {
         edges.push_back({0, i});
     }
+
     std::uniform_int_distribution<int> noise_prob(1, 100);
     for (int i = k + 1; i < node_count; ++i) {
         if (noise_prob(rng) <= 15) {
@@ -206,7 +217,7 @@ void print_test(int node_count, int query_count, std::vector<Edge>& edges, std::
             if (queries[i].type == 'C') {
                 dsu.unite(queries[i].u, queries[i].v);
             } else {
-                if (prob_dist(rng) < 0.8) {
+                if (prob_dist(rng) < same_comp_ratio) {
                     int root = dsu.find(queries[i].u);
                     if (dsu.members[root].size() > 1)
                         queries[i].v = dsu.get_random_same_component_node(queries[i].u, rng);
@@ -228,20 +239,45 @@ int main(int argc, char* argv[]) {
     std::vector<char> io_buffer(io_buffer_size);
     std::cout.rdbuf()->pubsetbuf(io_buffer.data(), io_buffer_size);
 
-    if (argc < 5) {
-        std::cerr
-            << "Usage: " << argv[0]
-            << " <node_count> <query_count> <seed> <tree_type> [cut_ratio] [same_comp_heavy]\n";
+    if (argc < 5 || argc > 8) {
+        std::cerr << "Usage: " << argv[0]
+                  << " <node_count> <query_count> <seed> <tree_type> [cut_ratio] [same_comp_heavy] "
+                     "[same_comp_ratio]\n";
         return EXIT_FAILURE;
     }
 
     int node_count = std::stoi(argv[1]);
+
+    if (node_count < 1) {
+        std::cerr << "Node count must be at least 1!\n";
+        return EXIT_FAILURE;
+    }
+
     int query_count = std::stoi(argv[2]);
     uint32_t seed = std::stoul(argv[3]);
     std::string tree_type = argv[4];
+
+    if (query_count < 0) {
+        std::cerr << "Query count must be at least zero!\n";
+        return EXIT_FAILURE;
+    }
+
     double cut_ratio = (argc > 5) ? std::stod(argv[5]) : 0.2;
-    bool same_comp_heavy = (argc > 6) ? (std::stoi(argv[6]) != 0) : true;
+    int same_comp_heavy_value = (argc > 6) ? std::stoi(argv[6]) : 1;
+
+    if (same_comp_heavy_value != 0 && same_comp_heavy_value != 1) {
+        std::cerr << "same_comp_heavy must be 0 or 1.\n";
+        return EXIT_FAILURE;
+    }
+
+    bool same_comp_heavy = same_comp_heavy_value == 1;
+
     double same_comp_ratio = (argc > 7) ? std::stod(argv[7]) : 0.8;
+
+    if (std::min(cut_ratio, same_comp_ratio) < 0 || std::max(cut_ratio, same_comp_ratio) > 1) {
+        std::cerr << "One of the ratio is not in the range [0,1]!\n";
+        return EXIT_FAILURE;
+    }
     std::mt19937 rng(seed);
     std::vector<Edge> edges;
     edges.reserve(node_count - 1);
@@ -265,7 +301,8 @@ int main(int argc, char* argv[]) {
     } else if (tree_type == "misc_2") {
         gen_misc_2(node_count, edges, rng);
     } else {
-        gen_random(node_count, edges, rng);
+        std::cerr << "Wrong topology of the tree!\n";
+        return EXIT_FAILURE;
     }
 
     print_test(node_count, query_count, edges, rng, cut_ratio, same_comp_heavy, same_comp_ratio);
