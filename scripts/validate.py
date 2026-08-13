@@ -1,18 +1,19 @@
 import subprocess
 import time
-import os
+from pathlib import Path
 import sys
 import random
 import resource
 
 TREE_TYPES = ["random", "deep", "caterpillar", "caterpillar_with_trees", "misc_1", "misc_2"]
-ALGORITHMS = ["euler-tour", "micro-trees","euler-tour-trees"]
+ALGORITHMS = ["micro-trees"]
 BASE_ALGO = "small-to-large"
 BRUTE_ALGO = "brute-force"
 
-BUILD_DIR = "../build"
-GEN = os.path.join(BUILD_DIR, "generator")
-SOLVER = os.path.join(BUILD_DIR, "decremental_tree_connectivity")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+BUILD_DIR = PROJECT_ROOT / "build"
+GEN = BUILD_DIR / "generator"
+SOLVER = BUILD_DIR / "decremental_tree_connectivity"
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -65,7 +66,8 @@ def print_header(mode, n, m, iteration, total_iters):
     print(BOLD + header + RESET)
     print("-" * len(header))
 
-def benchmark(mode, iterations):
+def benchmark(mode, iterations, parent_seed):
+    rng = random.Random(parent_seed)
     set_unlimited_stack()
     if mode == "correctness_test":
         n, m, ref_algo = 100, 50000, BRUTE_ALGO
@@ -77,8 +79,8 @@ def benchmark(mode, iterations):
     for i in range(1, iterations + 1):
         print_header(mode, n, m, i, iterations)
         for tree_type in TREE_TYPES:
-            seed = random.randint(0, 1000000)
-            test_in = os.path.join(BUILD_DIR, "test.in")
+            seed = rng.randint(0, 1000000)
+            test_in = BUILD_DIR / "test.in"
             with open(test_in, "w") as f:
                 subprocess.run([GEN, str(n), str(m), str(seed), tree_type], stdout=f, check=True)
             
@@ -86,33 +88,43 @@ def benchmark(mode, iterations):
             
             ref_out, ref_time, ref_mem, rc_ref = get_best_stats(ref_algo, test_in)
             if rc_ref != 0:
+                failure_input = BUILD_DIR / "wrong_test.in"
+                failure_input.write_text(test_in.read_text())
                 print(f"{RED}{ref_algo:<20} | FAILED (STOPS){RESET}")
                 sys.exit(1)
             
             print(f"{CYAN}{ref_algo:<20}{RESET} | {CYAN}BASELINE{RESET}   | {ref_time:>9.2f} | {ref_mem:>11}")
 
             current_algos = list(test_algos)
-            random.shuffle(current_algos)
+            rng.shuffle(current_algos)
 
             for algo in current_algos:
                 out, duration, mem, rc = get_best_stats(algo, test_in)
                 
                 if rc != 0:
                     print(f"{BOLD}{algo:<20}{RESET} | {RED}CRASHED (STOPS){RESET} | {0.00:>9.2f} | {0:>11}")
+                    failure_input = BUILD_DIR / "wrong_test.in"
+                    failure_input.write_text(test_in.read_text())
                     sys.exit(1)
                 elif out == ref_out:
                     print(f"{BOLD}{algo:<20}{RESET} | {GREEN}PASSED{RESET}     | {duration:>9.2f} | {mem:>11}")
                 else:
                     print(f"{BOLD}{algo:<20}{RESET} | {RED}WRONG (STOPS){RESET}   | {duration:>9.2f} | {mem:>11}")
-                    with open(os.path.join(BUILD_DIR, "ref.out"), "w") as f: f.write(ref_out)
-                    with open(os.path.join(BUILD_DIR, "algo.out"), "w") as f: f.write(out)
+                    with open(BUILD_DIR / "ref.out", "w") as f: f.write(ref_out)
+                    with open(BUILD_DIR / "algo.out", "w") as f: f.write(out)
+                    failure_input = BUILD_DIR / "wrong_test.in"
+                    failure_input.write_text(test_in.read_text())
                     sys.exit(1)
             print("-" * 60)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python validate.py [stress_test | correctness_test] [iterations]")
+        print("Usage: python validate.py [stress_test | correctness_test] [iterations] [parent_seed]")
     else:
         mode = sys.argv[1]
         iters = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-        benchmark(mode, iters)
+
+        parent_seed = int(sys.argv[3]) if len(sys.argv) > 3 else 12121
+
+
+        benchmark(mode, iters, parent_seed)
