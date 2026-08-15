@@ -20,7 +20,7 @@ public:
         component_id.resize(n, 1);
         edge_erased.resize(edges.size(), false);
         vis.resize(n, 0);
-        for (int i = 0; i < edges.size(); i++) {
+        for (std::size_t i = 0; i < edges.size(); i++) {
             const auto& [u, v] = edges[i];
             neighbors[u].emplace_back(v, i);
             neighbors[v].emplace_back(u, i);
@@ -42,7 +42,7 @@ public:
         int neighbor_idx_last;
         int our_vis_ptr;
         std::vector<int> componentVertices;
-        OneStepTraverse(SmallToLargeSolver* _ptr, int _source) : source(_source), ptr(_ptr) {
+        OneStepTraverse(SmallToLargeSolver* _ptr, int _source) : ptr(_ptr), source(_source) {
             current_vertex = -1;
             neighbor_idx_last = -1;
             ptr->vis_ptr++;
@@ -63,7 +63,7 @@ public:
                 }
                 neighbor_idx_last++;
 
-                if (neighbor_idx_last < ptr->neighbors[current_vertex].size()) {
+                if (neighbor_idx_last < static_cast<int>(ptr->neighbors[current_vertex].size())) {
                     auto& [v, edge_idx] = ptr->neighbors[current_vertex][neighbor_idx_last];
                     if (ptr->edge_erased[edge_idx] || ptr->vis[v] == our_vis_ptr) {
                         continue;
@@ -107,8 +107,8 @@ public:
 
         assert(choose != nullptr);
         counter++;
-        for (const auto& u : *choose)
-            component_id[u] = counter;
+        for (const auto& vertex : *choose)
+            component_id[vertex] = counter;
     }
 
     bool connected(int u, int v) override {

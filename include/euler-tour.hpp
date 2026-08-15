@@ -47,8 +47,7 @@ public:
         cur_val.resize(n, 0);
         pre.resize(n);
         post.resize(n);
-        for (int i = 0; i < edges.size(); i++) {
-            const auto& [u, v] = edges[i];
+        for (const auto& [u, v] : edges) {
             neighbors[u].emplace_back(v);
             neighbors[v].emplace_back(u);
         }
@@ -113,7 +112,7 @@ public:
 
     void cut(int u, int v) override {
         if (u == par[v])
-            std::swap(u, v); 
+            std::swap(u, v);
         update(u, 1);
     }
 

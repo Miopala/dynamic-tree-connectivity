@@ -35,7 +35,7 @@ TREE_TYPES = [
     "misc_1",
     "misc_2",
 ]
-ALGORITHMS = ["micro-trees"]
+ALGORITHMS = ["euler-tour", "micro-trees", "euler-tour-trees"]
 BASE_ALGO = "small-to-large"
 BRUTE_ALGO = "brute-force"
 SOLVER_TIMEOUT_SECONDS = 60

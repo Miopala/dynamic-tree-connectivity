@@ -35,7 +35,7 @@ public:
         which_microtree.resize(n, -1);
         microtree_mask.resize(microtree_roots.size(), FULL_MSK);
         microtree_prefix_mask.resize(n, 0);
-        for (int i = 0; i < microtree_roots.size(); i++) {
+        for (size_t i = 0; i < microtree_roots.size(); i++) {
             microtree_id_counter = 0;
             dfs_microtree(microtree_roots[i], father[microtree_roots[i]], microtree_roots[i], i);
         }
@@ -70,7 +70,7 @@ public:
                 assert(chunk_vertices[chunk_number][0] == u);
                 chunk_pref[u] = 0;
                 chunk_mask[chunk_number] = FULL_MSK;
-                for (int i = 1; i < chunk_vertices[chunk_number].size(); i++) {
+                for (size_t i = 1; i < chunk_vertices[chunk_number].size(); i++) {
                     chunk_pref[chunk_vertices[chunk_number][i]] =
                         chunk_pref[chunk_vertices[chunk_number][i - 1]] |
                         (1 << chunk_id[chunk_vertices[chunk_number][i]]);
@@ -86,7 +86,6 @@ public:
             }
             std::vector<Edge> macro_edges;
             for (auto u : chunk_roots) {
-                int chunk_number = which_chunk[u];
                 int cur_macro = macrotree_id[u];
                 macro_edges.push_back({cur_macro, cur_macro + 1});
             }
@@ -112,7 +111,7 @@ public:
                 }
             }
 
-            assert(macro_edges.size() == macrotree_id_counter - 1);
+            assert(macro_edges.size() == static_cast<size_t>(macrotree_id_counter) - 1);
 
             macroTreeSolver.setup(macrotree_id_counter, macro_edges);
         }
