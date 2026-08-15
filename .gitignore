@@ -39,3 +39,6 @@ env/
 
 data/*
 !data/.gitkeep
+printing_script.sh
+repo_contents.txt
+build-*/
