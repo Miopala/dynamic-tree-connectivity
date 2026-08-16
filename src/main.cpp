@@ -4,6 +4,7 @@
 #include "euler-tour.hpp"
 #include "micro-tree.hpp"
 #include "small-to-large.hpp"
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <string_view>
@@ -12,10 +13,20 @@
 int main(int argc, char* argv[]) {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(nullptr);
-    if (argc != 2) {
+    if (argc < 2 || argc > 3) {
         std::cerr << "usage: " << argv[0]
-                  << " [brute-force|euler-tour|small-to-large|micro-trees|euler-tour-trees]";
+                  << " [brute-force|euler-tour|small-to-large|micro-trees|euler-tour-trees] "
+                     "[--benchmark]\n";
         return EXIT_FAILURE;
+    }
+
+    bool benchmark_mode = false;
+    if (argc == 3) {
+        if (std::string_view(argv[2]) != "--benchmark") {
+            std::cerr << "Unknown option: " << argv[2] << "\n";
+            return EXIT_FAILURE;
+        }
+        benchmark_mode = true;
     }
 
     int n, m;
@@ -47,6 +58,8 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    std::uint32_t benchmark_checksum = 0;
+
     for (int i = 0; i < m; i++) {
         char type;
         int u, v;
@@ -54,8 +67,20 @@ int main(int argc, char* argv[]) {
         if (type == 'C')
             solver->cut(u, v);
         else {
-            std::cout << (solver->connected(u, v) ? "YES\n" : "NO\n");
+            bool answer = solver->connected(u, v);
+            if (benchmark_mode) {
+                if (answer) {
+                    benchmark_checksum ^= static_cast<std::uint32_t>(i) + 1;
+                }
+            } else {
+                std::cout << (answer ? "YES\n" : "NO\n");
+            }
         }
     }
+
+    if (benchmark_mode) {
+        std::cout << benchmark_checksum << "\n";
+    }
+
     return EXIT_SUCCESS;
 }
