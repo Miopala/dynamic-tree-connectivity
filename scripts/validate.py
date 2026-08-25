@@ -39,7 +39,8 @@ ALGORITHMS = ["euler-tour", "micro-trees", "euler-tour-trees"]
 BASE_ALGO = "small-to-large"
 BRUTE_ALGO = "brute-force"
 SOLVER_TIMEOUT_SECONDS = 60
-
+DEFAULT_ITERATIONS = 1
+DEFAULT_PARENT_SEED = 12121
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = (
@@ -120,7 +121,7 @@ def validate(mode, iterations, parent_seed):
 
                     print(
                         f"{RED}{ref_algo:<20} | "
-                        f"REFERENCE TIMEOUT (STOPS){RESET}"
+                        f"REFERENCE TIMEOUT{RESET}"
                     )
                     sys.exit(1)
 
@@ -132,7 +133,7 @@ def validate(mode, iterations, parent_seed):
                     reference_stderr = BUILD_DIR / "reference.stderr"
                     reference_stderr.write_text(reference.stderr)
 
-                    print(f"{RED}{ref_algo:<20} | REFERENCE FAILED (STOPS){RESET}")
+                    print(f"{RED}{ref_algo:<20} | REFERENCE FAILED{RESET}")
                     sys.exit(1)
 
                 ref_out = reference.stdout
@@ -146,12 +147,12 @@ def validate(mode, iterations, parent_seed):
 
                         print(
                             f"{BOLD}{algo:<20}{RESET} | "
-                            f"{RED}TIMEOUT (STOPS){RESET}"
+                            f"{RED}TIMEOUT{RESET}"
                         )
                         sys.exit(1)
 
                     if result.returncode != 0:
-                        print(f"{BOLD}{algo:<20}{RESET} | {RED}CRASHED (STOPS){RESET}")
+                        print(f"{BOLD}{algo:<20}{RESET} | {RED}FAILED{RESET}")
 
                         (BUILD_DIR / "wrong_test.in").write_text(test_in.read_text())
                         (BUILD_DIR / "algo.stderr").write_text(result.stderr)
@@ -162,7 +163,7 @@ def validate(mode, iterations, parent_seed):
                         print(f"{BOLD}{algo:<20}{RESET} | {GREEN}PASSED{RESET}")
 
                     else:
-                        print(f"{BOLD}{algo:<20}{RESET} | {RED}WRONG (STOPS){RESET}")
+                        print(f"{BOLD}{algo:<20}{RESET} | {RED}WRONG{RESET}")
 
                         (BUILD_DIR / "wrong_test.in").write_text(test_in.read_text())
                         (BUILD_DIR / "ref.out").write_text(ref_out)
@@ -185,8 +186,8 @@ if __name__ == "__main__":
     mode = sys.argv[1]
 
     try:
-        iterations = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-        parent_seed = int(sys.argv[3]) if len(sys.argv) > 3 else 12121
+        iterations = int(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_ITERATIONS
+        parent_seed = int(sys.argv[3]) if len(sys.argv) > 3 else DEFAULT_PARENT_SEED
     except ValueError:
         print("Iterations and seed must be integers.", file=sys.stderr)
         print(usage, file=sys.stderr)

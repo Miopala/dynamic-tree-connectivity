@@ -64,6 +64,27 @@ Run one large stress-test iteration:
 python3 validate.py stress_test 1
 ```
 
+## Benchmarking
+
+Run a benchmark suite from the project root:
+
+```bash
+python3 scripts/benchmark.py quick
+```
+
+Available suites:
+
+- `quick` — small cases for a fast check.
+- `standard` — medium-sized cases for regular performance comparisons.
+- `full` — a broader range of sizes, seeds, tree topologies, and workloads.
+- `extreme` — 10-million-node cases for testing very large inputs.
+
+Use `--verbose` to display timings for every round and detailed per-case statistics:
+
+```bash
+python3 scripts/benchmark.py standard --verbose
+```
+
 ## Input format
 ```
 n m
