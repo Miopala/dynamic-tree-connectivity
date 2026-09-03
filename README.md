@@ -85,6 +85,8 @@ Use `--verbose` to display timings for every round and detailed per-case statist
 python3 scripts/benchmark.py standard --verbose
 ```
 
+See [PERFORMANCE.md](PERFORMANCE.md) for baseline results.
+
 ## Input format
 ```
 n m
