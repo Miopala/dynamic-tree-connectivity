@@ -85,13 +85,13 @@ def print_header(mode, n, m, iteration, total_iters):
 
 def validate(mode, iterations, parent_seed):
     rng = random.Random(parent_seed)
-    set_unlimited_stack()
     if mode == "correctness_test":
         test_cases = CORRECTNESS_CASES
         ref_algo = BRUTE_ALGO
         test_algos = ALGORITHMS + [BASE_ALGO]
 
     elif mode == "stress_test":
+        set_unlimited_stack()
         test_cases = STRESS_CASES
         ref_algo = BASE_ALGO
         test_algos = ALGORITHMS
