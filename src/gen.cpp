@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <numeric>
 #include <random>
@@ -166,7 +168,8 @@ struct Query {
 };
 
 void print_test(int node_count, int query_count, std::vector<Edge>& edges, std::mt19937& rng,
-                double cut_ratio, bool same_comp_heavy, double same_comp_ratio = 0.8) {
+                double cut_ratio, bool same_comp_heavy, double same_comp_ratio = 0.8,
+                bool ordered_cuts = false) {
     std::vector<int> labels(node_count);
     std::iota(labels.begin(), labels.end(), 0);
     std::shuffle(labels.begin(), labels.end(), rng);
@@ -185,7 +188,8 @@ void print_test(int node_count, int query_count, std::vector<Edge>& edges, std::
 
     std::vector<int> edge_indices(edges.size());
     std::iota(edge_indices.begin(), edge_indices.end(), 0);
-    std::shuffle(edge_indices.begin(), edge_indices.end(), rng);
+    if (!ordered_cuts)
+        std::shuffle(edge_indices.begin(), edge_indices.end(), rng);
 
     std::uniform_real_distribution<double> prob_dist(0.0, 1.0);
     std::uniform_int_distribution<int> node_dist(0, node_count - 1);
@@ -239,10 +243,10 @@ int main(int argc, char* argv[]) {
     std::vector<char> io_buffer(io_buffer_size);
     std::cout.rdbuf()->pubsetbuf(io_buffer.data(), io_buffer_size);
 
-    if (argc < 5 || argc > 8) {
+    if (argc < 5 || argc > 9) {
         std::cerr << "Usage: " << argv[0]
                   << " <node_count> <query_count> <seed> <tree_type> [cut_ratio] [same_comp_heavy] "
-                     "[same_comp_ratio]\n";
+                     "[same_comp_ratio] [ordered_cuts]\n";
         return EXIT_FAILURE;
     }
 
@@ -273,6 +277,15 @@ int main(int argc, char* argv[]) {
     bool same_comp_heavy = same_comp_heavy_value == 1;
 
     double same_comp_ratio = (argc > 7) ? std::stod(argv[7]) : 0.8;
+
+    int ordered_cuts_value = (argc > 8) ? std::stoi(argv[8]) : 0;
+
+    if (ordered_cuts_value != 0 && ordered_cuts_value != 1) {
+        std::cerr << "ordered_cuts must be 0 or 1.\n";
+        return EXIT_FAILURE;
+    }
+
+    bool ordered_cuts = ordered_cuts_value == 1;
 
     if (std::min(cut_ratio, same_comp_ratio) < 0 || std::max(cut_ratio, same_comp_ratio) > 1) {
         std::cerr << "One of the ratio is not in the range [0,1]!\n";
@@ -305,7 +318,8 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    print_test(node_count, query_count, edges, rng, cut_ratio, same_comp_heavy, same_comp_ratio);
+    print_test(node_count, query_count, edges, rng, cut_ratio, same_comp_heavy, same_comp_ratio,
+               ordered_cuts);
 
     return EXIT_SUCCESS;
 }

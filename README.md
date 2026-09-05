@@ -78,6 +78,7 @@ Available suites:
 - `standard` — medium-sized cases for regular performance comparisons.
 - `full` — a broader range of sizes, seeds, tree topologies, and workloads.
 - `extreme` — 10-million-node cases for testing very large inputs.
+- `small-to-large-adversarial` — ordered star cuts exposing worst-case scaling in the small-to-large implementation.
 
 Use `--verbose` to display timings for every round and detailed per-case statistics:
 
@@ -170,8 +171,10 @@ Example:
 Generator arguments:
 
 ```text
-generator <nodes> <operations> <seed> <tree_type> [cut_ratio] [same_component_heavy] [same_comp_ratio]
+generator <nodes> <operations> <seed> <tree_type> [cut_ratio] [same_component_heavy] [same_comp_ratio] [ordered_cuts]
 ```
+
+Set `ordered_cuts` to `1` to delete edges in the same order in which they appear in the generated input.
 
 ## References
 

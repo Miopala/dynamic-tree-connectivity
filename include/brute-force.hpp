@@ -2,11 +2,12 @@
 #include "core.hpp"
 #include <algorithm>
 #include <queue>
+#include <vector>
 
-class NaiveSolver : public DecrementalConnectivitySolver {
+class BruteForceSolver : public DecrementalConnectivitySolver {
 public:
-    NaiveSolver(int _n, const std::vector<Edge>& edges) : n(_n) {
-        neighbors.resize(n);
+    BruteForceSolver(int node_count, const std::vector<Edge>& edges)
+        : node_count(node_count), neighbors(node_count) {
         for (const auto& [u, v] : edges) {
             neighbors[u].emplace_back(v);
             neighbors[v].emplace_back(u);
@@ -14,35 +15,35 @@ public:
     }
 
     void cut(int u, int v) override {
-        auto remove_from_adj = [&](int a, int b) {
-            auto it = std::find(neighbors[a].begin(), neighbors[a].end(), b);
-            if (it != neighbors[a].end()) {
-                std::iter_swap(it, neighbors[a].end() - 1);
-                neighbors[a].pop_back();
+        auto remove_neighbor = [this](int vertex, int neighbor) {
+            auto it = std::find(neighbors[vertex].begin(), neighbors[vertex].end(), neighbor);
+            if (it != neighbors[vertex].end()) {
+                std::iter_swap(it, neighbors[vertex].end() - 1);
+                neighbors[vertex].pop_back();
             }
         };
 
-        remove_from_adj(u, v);
-        remove_from_adj(v, u);
+        remove_neighbor(u, v);
+        remove_neighbor(v, u);
     }
 
     bool connected(int u, int v) override {
         if (u == v)
             return true;
-        std::queue<int> q;
-        std::vector<bool> vis(n, false);
-        q.push(u);
-        vis[u] = true;
-        while (!q.empty()) {
-            int cur = q.front();
-            q.pop();
-            for (auto nei : neighbors[cur]) {
-                if (nei == v)
+        std::queue<int> queue;
+        std::vector<bool> visited(node_count, false);
+        queue.push(u);
+        visited[u] = true;
+        while (!queue.empty()) {
+            int current = queue.front();
+            queue.pop();
+            for (auto neighbor : neighbors[current]) {
+                if (neighbor == v)
                     return true;
-                if (vis[nei])
+                if (visited[neighbor])
                     continue;
-                vis[nei] = true;
-                q.push(nei);
+                visited[neighbor] = true;
+                queue.push(neighbor);
             }
         }
 
@@ -50,6 +51,6 @@ public:
     }
 
 private:
-    const int n;
+    const int node_count;
     std::vector<std::vector<int>> neighbors;
 };

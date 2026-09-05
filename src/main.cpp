@@ -6,9 +6,11 @@
 #include "small-to-large.hpp"
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 struct Operation {
@@ -63,7 +65,7 @@ int main(int argc, char* argv[]) {
     if (chosen_algorithm == "brute-force") {
         if (benchmark_mode)
             preprocessing_start = std::chrono::steady_clock::now();
-        solver = std::make_unique<NaiveSolver>(n, edges);
+        solver = std::make_unique<BruteForceSolver>(n, edges);
     } else if (chosen_algorithm == "euler-tour") {
         if (benchmark_mode)
             preprocessing_start = std::chrono::steady_clock::now();

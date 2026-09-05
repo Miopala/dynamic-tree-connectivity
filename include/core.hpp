@@ -1,6 +1,4 @@
 #pragma once
-#include <utility>
-#include <vector>
 
 struct Edge {
     int u, v;

@@ -12,6 +12,7 @@ class WorkloadProfile:
     cut_ratio: float
     same_component_heavy: bool
     same_component_ratio: float
+    ordered_cuts: bool = False
 
 
 @dataclass(frozen=True)
@@ -91,6 +92,14 @@ CUT_HEAVY_WORKLOAD = WorkloadProfile(
     cut_ratio=0.8,
     same_component_heavy=False,
     same_component_ratio=0.0,
+)
+
+ORDERED_CUTS_WORKLOAD = WorkloadProfile(
+    name="ordered-cuts",
+    cut_ratio=1.0,
+    same_component_heavy=False,
+    same_component_ratio=0.0,
+    ordered_cuts=True,
 )
 
 WORKLOAD_PROFILES = (
@@ -188,6 +197,20 @@ BENCHMARK_SUITES = {
             (12345,),
         ),
     ),
+    "small-to-large-adversarial": BenchmarkSuite(
+        rounds=4,
+        cases=tuple(
+            BenchmarkCase(
+                name=f"ordered-star-cuts-{node_count}",
+                node_count=node_count,
+                operation_count=node_count - 1,
+                seed=12345,
+                tree_type="star",
+                workload=ORDERED_CUTS_WORKLOAD,
+            )
+            for node_count in (4000, 8000, 16000, 100000)
+        ),
+    ),
 }
 
 
@@ -242,6 +265,7 @@ def generate_input(benchmark_case):
                     str(benchmark_case.workload.cut_ratio),
                     "1" if benchmark_case.workload.same_component_heavy else "0",
                     str(benchmark_case.workload.same_component_ratio),
+                    "1" if benchmark_case.workload.ordered_cuts else "0",
                 ],
                 stdout=output_file,
                 stderr=subprocess.PIPE,

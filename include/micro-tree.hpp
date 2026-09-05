@@ -3,10 +3,13 @@
 #include "small-to-large.hpp"
 #include <algorithm>
 #include <bit>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <limits.h>
 #include <queue>
+#include <vector>
+
 const int FULL_MSK = INT_MAX;
 
 class MicroTreeSolver : public DecrementalConnectivitySolver {

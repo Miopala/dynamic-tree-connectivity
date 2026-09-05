@@ -1,3 +1,4 @@
+#pragma once
 #include "core.hpp"
 #include <algorithm>
 #include <cassert>
@@ -105,6 +106,9 @@ public:
         for (const auto& e : edges)
             connect(e.u, e.v);
     }
+
+    EulerTourTreesSolver(const EulerTourTreesSolver&) = delete;
+    EulerTourTreesSolver& operator=(const EulerTourTreesSolver&) = delete;
 
     void connect(int u, int v) {
         if (connected(u, v))

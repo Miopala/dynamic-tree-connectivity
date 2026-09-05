@@ -1,18 +1,11 @@
 #pragma once
 #include "core.hpp"
-#include <algorithm>
-#include <cassert>
-#include <queue>
-#include <unordered_map>
+#include <utility>
+#include <vector>
 
 class FenwickTree {
 public:
-    FenwickTree() {}
-    explicit FenwickTree(int n) : tree(n + 1, 0) {}
-
-    void resize(int n) {
-        tree.resize(n + 1, 0);
-    }
+    explicit FenwickTree(int size) : tree(size + 1, 0) {}
 
     void update(int i, int delta) {
         for (++i; i < static_cast<int>(tree.size()); i += i & -i) {
@@ -40,97 +33,93 @@ private:
 
 class EulerTourSolver : public DecrementalConnectivitySolver {
 public:
-    EulerTourSolver(int _n, const std::vector<Edge>& edges) : n(_n) {
-        neighbors.resize(n);
-        par.resize(n);
-        depth.resize(n, 0);
-        cur_val.resize(n, 0);
-        pre.resize(n);
-        post.resize(n);
+    EulerTourSolver(int node_count, const std::vector<Edge>& edges)
+        : parent(node_count), neighbors(node_count), entry_time(node_count), exit_time(node_count),
+          depth(node_count, 0), parent_edge_cut(node_count, 0), fenwick_tree(2 * node_count) {
         for (const auto& [u, v] : edges) {
             neighbors[u].emplace_back(v);
             neighbors[v].emplace_back(u);
         }
-        int POW = 1;
-        while (POW < n) {
-            LOG++, POW *= 2;
+
+        int power_of_two = 1;
+        while (power_of_two < node_count) {
+            max_log++;
+            power_of_two *= 2;
         }
-        A = std::move(std::vector<std::vector<int>>(n, std::vector<int>(LOG + 1, 0)));
+
+        ancestors.assign(node_count, std::vector<int>(max_log + 1, 0));
         dfs(0, 0);
-        for (int lvl = 1; lvl <= LOG; lvl++) {
-            for (int i = 0; i < n; i++) {
-                A[i][lvl] = A[A[i][lvl - 1]][lvl - 1];
+        for (int level = 1; level <= max_log; level++) {
+            for (int i = 0; i < node_count; i++) {
+                ancestors[i][level] = ancestors[ancestors[i][level - 1]][level - 1];
             }
         }
-        f.resize(euler_tour.size());
     }
 
-    void update(int u, int val) {
-        int delta = val - cur_val[u];
-        f.update(pre[u], delta);
-        f.update(post[u], -delta);
-        cur_val[u] = val;
+    void cut(int u, int v) override {
+        if (u == parent[v])
+            std::swap(u, v);
+        update(u, 1);
     }
 
-    int query(int u, int v) {
-        int LCA = lca(u, v);
-        return f.query(pre[LCA], pre[u]) + f.query(pre[LCA], pre[v]) - cur_val[LCA] * 2;
+    bool connected(int u, int v) override {
+        return u == v || query(u, v) == 0;
     }
 
-    int lca(int u, int v) {
+private:
+    std::vector<int> parent;
+    std::vector<std::vector<int>> ancestors;
+    std::vector<std::vector<int>> neighbors;
+    std::vector<int> entry_time, exit_time;
+    std::vector<int> depth;
+    std::vector<int> parent_edge_cut;
+    int euler_position = 0;
+    int max_log = 0;
+    FenwickTree fenwick_tree;
+
+    void update(int u, int value) {
+        const int delta = value - parent_edge_cut[u];
+        fenwick_tree.update(entry_time[u], delta);
+        fenwick_tree.update(exit_time[u], -delta);
+        parent_edge_cut[u] = value;
+    }
+
+    int query(int u, int v) const {
+        const int LCA = lca(u, v);
+        return fenwick_tree.query(entry_time[LCA], entry_time[u]) +
+               fenwick_tree.query(entry_time[LCA], entry_time[v]) - parent_edge_cut[LCA] * 2;
+    }
+
+    int lca(int u, int v) const {
         if (depth[u] > depth[v])
             std::swap(u, v);
-        for (int i = LOG; i >= 0; i--) {
-            if (depth[A[v][i]] >= depth[u]) {
-                v = A[v][i];
+        for (int i = max_log; i >= 0; i--) {
+            if (depth[ancestors[v][i]] >= depth[u]) {
+                v = ancestors[v][i];
             }
         }
 
         if (u == v)
             return u;
 
-        for (int i = LOG; i >= 0; i--) {
-            if (A[v][i] != A[u][i])
-                v = A[v][i], u = A[u][i];
+        for (int i = max_log; i >= 0; i--) {
+            if (ancestors[v][i] != ancestors[u][i]) {
+                v = ancestors[v][i];
+                u = ancestors[u][i];
+            }
         }
-        return A[u][0];
+        return ancestors[u][0];
     }
 
-    void dfs(int u, int fa) {
-        A[u][0] = par[u] = fa;
-        euler_tour.push_back(u);
-        pre[u] = euler_tour.size() - 1;
+    void dfs(int u, int parent_vertex) {
+        ancestors[u][0] = parent[u] = parent_vertex;
+        entry_time[u] = euler_position++;
         for (auto v : neighbors[u]) {
-            if (fa == v)
+            if (parent_vertex == v)
                 continue;
             depth[v] = depth[u] + 1;
             dfs(v, u);
         }
-        euler_tour.push_back(u);
-        post[u] = euler_tour.size() - 1;
+        exit_time[u] = euler_position++;
     }
-
-    void cut(int u, int v) override {
-        if (u == par[v])
-            std::swap(u, v);
-        update(u, 1);
-    }
-
-    bool connected(int u, int v) override {
-        if (u == v || query(u, v) == 0)
-            return true;
-        return false;
-    }
-
-private:
-    const int n;
-    std::vector<int> par;
-    std::vector<std::vector<int>> A;
-    std::vector<std::vector<int>> neighbors;
-    std::vector<int> euler_tour;
-    std::vector<int> pre, post;
-    std::vector<int> depth;
-    std::vector<int> cur_val;
-    int LOG = 0;
-    FenwickTree f;
 };
